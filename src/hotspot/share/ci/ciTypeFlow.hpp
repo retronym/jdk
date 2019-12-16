@@ -44,6 +44,8 @@ private:
   int _max_stack;
   int _code_size;
   bool      _has_irreducible_entry;
+  int       _invoke_count;
+  bool      _is_tiny_inline;
 
   const char* _failure_reason;
 
@@ -67,6 +69,7 @@ public:
   int       max_cells() const  { return _max_locals + _max_stack; }
   int       code_size() const  { return _code_size; }
   bool      has_irreducible_entry() const { return _has_irreducible_entry; }
+  bool      is_tiny_inline() const { return _is_tiny_inline; }
 
   // Represents information about an "active" jsr call.  This
   // class represents a call to the routine at some entry address

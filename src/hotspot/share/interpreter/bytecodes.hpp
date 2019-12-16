@@ -411,6 +411,7 @@ class Bytecodes: AllStatic {
   static bool        is_java_code   (Code code)    { return 0 <= code && code < number_of_java_codes; }
 
   static bool        is_store_into_local(Code code){ return (_istore <= code && code <= _astore_3); }
+  static bool        is_load_from_local(Code code) { return (_iload <= code && code <= _aload_3); }
   static bool        is_const       (Code code)    { return (_aconst_null <= code && code <= _ldc2_w); }
   static bool        is_zero_const  (Code code)    { return (code == _aconst_null || code == _iconst_0
                                                            || code == _fconst_0 || code == _dconst_0); }

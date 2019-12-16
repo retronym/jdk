@@ -630,7 +630,6 @@ bool Method::is_vanilla_constructor() const {
   return true;
 }
 
-
 bool Method::compute_has_loops_flag() {
   BytecodeStream bcs(methodHandle(Thread::current(), this));
   Bytecodes::Code bc;

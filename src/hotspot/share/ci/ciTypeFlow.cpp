@@ -652,6 +652,7 @@ void ciTypeFlow::StateVector::do_invoke(ciBytecodeStream* str,
   ciSignature* declared_signature = NULL;
   ciMethod* callee = str->get_method(will_link, &declared_signature);
   assert(declared_signature != NULL, "cannot be null");
+  outer()->_invoke_count = outer()->_invoke_count + 1; // TODO whitelist methods like box/unbox that don't contribute do this count.
   if (!will_link) {
     // We weren't able to find the method.
     if (str->cur_bc() == Bytecodes::_invokedynamic) {
@@ -1984,6 +1985,8 @@ ciTypeFlow::ciTypeFlow(ciEnv* env, ciMethod* method, int osr_bci) {
   _max_stack = method->max_stack();
   _code_size = method->code_size();
   _has_irreducible_entry = false;
+  _invoke_count = 0;
+  _is_tiny_inline = false;
   _osr_bci = osr_bci;
   _failure_reason = NULL;
   assert(0 <= start_bci() && start_bci() < code_size() , "correct osr_bci argument: 0 <= %d < %d", start_bci(), code_size());
@@ -2890,6 +2893,10 @@ void ciTypeFlow::do_flow() {
   }
 
   map_blocks();
+
+  if (block_count() == 1 && !_method->has_monitor_bytecodes() && _invoke_count <= 1) {
+    _is_tiny_inline = true;
+  }
 
   if (CIPrintTypeFlow || CITraceTypeFlow) {
     rpo_print_on(tty);
