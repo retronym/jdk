@@ -1352,6 +1352,10 @@ bool ciMethod::is_unboxing_method() const {
   return false;
 }
 
+bool ciMethod::is_tiny_inline () {
+  return get_flow_analysis()->is_tiny_inline();
+}
+
 BCEscapeAnalyzer  *ciMethod::get_bcea() {
 #ifdef COMPILER2
   if (_bcea == NULL) {
