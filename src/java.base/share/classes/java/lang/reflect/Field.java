@@ -35,6 +35,7 @@ import sun.reflect.generics.factory.CoreReflectionFactory;
 import sun.reflect.generics.factory.GenericsFactory;
 import sun.reflect.generics.scope.ClassScope;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.VarHandle;
 import java.util.Map;
 import java.util.Objects;
 import sun.reflect.annotation.AnnotationParser;
@@ -133,6 +134,7 @@ class Field extends AccessibleObject implements Member {
         this.slot = slot;
         this.signature = signature;
         this.annotations = annotations;
+        VarHandle.releaseFence();
     }
 
     /**
@@ -156,7 +158,7 @@ class Field extends AccessibleObject implements Member {
         // Might as well eagerly propagate this if already present
         res.fieldAccessor = fieldAccessor;
         res.overrideFieldAccessor = overrideFieldAccessor;
-
+        VarHandle.releaseFence(); // release root, fieldAccessor, overrideFieldAccessor
         return res;
     }
 

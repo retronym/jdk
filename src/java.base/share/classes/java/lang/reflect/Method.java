@@ -42,6 +42,7 @@ import sun.reflect.annotation.AnnotationType;
 import sun.reflect.annotation.AnnotationParser;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.AnnotationFormatError;
+import java.lang.invoke.VarHandle;
 import java.nio.ByteBuffer;
 import java.util.StringJoiner;
 
@@ -140,6 +141,7 @@ public final class Method extends Executable {
         this.annotations = annotations;
         this.parameterAnnotations = parameterAnnotations;
         this.annotationDefault = annotationDefault;
+        VarHandle.releaseFence();
     }
 
     /**
@@ -164,6 +166,7 @@ public final class Method extends Executable {
         res.root = this;
         // Might as well eagerly propagate this if already present
         res.methodAccessor = methodAccessor;
+        VarHandle.releaseFence(); // releases root (note: methodAccessor is volatile)
         return res;
     }
 
@@ -179,6 +182,7 @@ public final class Method extends Executable {
                 annotations, parameterAnnotations, annotationDefault);
         res.root = root;
         res.methodAccessor = methodAccessor;
+        VarHandle.releaseFence(); // releases root (note: methodAccessor is volatile)
         return res;
     }
 
