@@ -38,6 +38,7 @@ import sun.reflect.generics.factory.GenericsFactory;
 import sun.reflect.generics.scope.ConstructorScope;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.AnnotationFormatError;
+import java.lang.invoke.VarHandle;
 import java.util.StringJoiner;
 
 /**
@@ -129,6 +130,7 @@ public final class Constructor<T> extends Executable {
         this.signature = signature;
         this.annotations = annotations;
         this.parameterAnnotations = parameterAnnotations;
+        VarHandle.releaseFence();
     }
 
     /**
@@ -156,6 +158,7 @@ public final class Constructor<T> extends Executable {
         res.root = this;
         // Might as well eagerly propagate this if already present
         res.constructorAccessor = constructorAccessor;
+        VarHandle.releaseFence(); // release root, constructorAccessor
         return res;
     }
 
