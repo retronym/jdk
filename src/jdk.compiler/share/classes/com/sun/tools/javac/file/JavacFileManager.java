@@ -556,14 +556,14 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
 
         public ArchiveContainer(Path archivePath) throws IOException, ProviderNotFoundException, SecurityException {
             this.archivePath = archivePath;
+            Map<String, String> env = new HashMap<String, String>();
+            env.put("zipinfo-time", "false"); // optimization: avoid read of Extended Timestamp
+            FileSystemProvider jarFSProvider = fsInfo.getJarFSProvider();
+            Assert.checkNonNull(jarFSProvider, "should have been caught before!");
             if (multiReleaseValue != null && archivePath.toString().endsWith(".jar")) {
-                Map<String,String> env = Collections.singletonMap("multi-release", multiReleaseValue);
-                FileSystemProvider jarFSProvider = fsInfo.getJarFSProvider();
-                Assert.checkNonNull(jarFSProvider, "should have been caught before!");
-                this.fileSystem = jarFSProvider.newFileSystem(archivePath, env);
-            } else {
-                this.fileSystem = FileSystems.newFileSystem(archivePath, (ClassLoader)null);
+                env.put("multi-release", multiReleaseValue);
             }
+            this.fileSystem = jarFSProvider.newFileSystem(archivePath, env);
             packages = new HashMap<>();
             for (Path root : fileSystem.getRootDirectories()) {
                 Files.walkFileTree(root, NO_FILE_VISIT_OPTIONS, Integer.MAX_VALUE,
