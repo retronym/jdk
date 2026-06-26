@@ -2068,6 +2068,11 @@ jint Arguments::parse_each_vm_init_arg(const JavaVMInitArgs* args, JVMFlagOrigin
       if (FLAG_SET_CMDLINE(BackgroundCompilation, false) != JVMFlag::SUCCESS) {
         return JNI_EINVAL;
       }
+    // -Xauto-stable-scala-lazy-val
+    } else if (match_option(option, "-Xauto-stable-scala-lazy-val")) {
+      if (FLAG_SET_CMDLINE(AutoStableScalaLazyVal, true) != JVMFlag::SUCCESS) {
+        return JNI_EINVAL;
+      }
     // -Xmn for compatibility with other JVM vendors
     } else if (match_option(option, "-Xmn", &tail)) {
       julong long_initial_young_size = 0;

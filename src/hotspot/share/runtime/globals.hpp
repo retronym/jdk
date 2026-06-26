@@ -831,6 +831,12 @@ const int ObjectAlignmentInBytes = 8;
   product(bool, RestrictContended, true,                                    \
           "Restrict @Contended to trusted classes")                         \
                                                                             \
+  product(bool, AutoStableScalaLazyVal, false,                              \
+          "Treat a field x as @Stable when the class also declares a "      \
+          "method x$lzycompute whose return type is identical to the "      \
+          "field's type (the Scala lazy val pattern). Enabled by the "      \
+          "-Xauto-stable-scala-lazy-val launcher option.")                  \
+                                                                            \
   product(int, DiagnoseSyncOnValueBasedClasses, 0, DIAGNOSTIC,              \
              "Detect and take action upon identifying synchronization on "  \
              "value based classes. Modes: "                                 \

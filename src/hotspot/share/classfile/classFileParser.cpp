@@ -5694,6 +5694,47 @@ void ClassFileParser::parse_stream(const ClassFileStream* const stream,
     _has_nonstatic_concrete_methods = true;
   }
 
+  // -Xauto-stable-scala-lazy-val: mark a field x as @Stable when the class
+  // also declares a method x$lzycompute whose return type is identical to
+  // the field's type.  This is the shape the Scala compiler emits for a
+  // `lazy val`: x is the once-computed cache slot, guarded by a bitmap, and
+  // treating it as stable lets the JIT constant-fold it after computation.
+  // Unlike the @Stable annotations this is honored for any class loader.
+  if (AutoStableScalaLazyVal && _methods != nullptr && _temp_field_info != nullptr) {
+    ResourceMark rm(THREAD);
+    const char* const suffix = "$lzycompute";
+    const size_t suffix_len = strlen(suffix);
+    for (int fi = 0; fi < _temp_field_info->length(); fi++) {
+      FieldInfo* f = _temp_field_info->adr_at(fi);
+      if (f->field_flags().is_stable()) {
+        continue;  // already stable
+      }
+      const char* const fname = f->name(_cp)->as_C_string();
+      const char* const fsig  = f->signature(_cp)->as_C_string();
+      const size_t fname_len = strlen(fname);
+      for (int mi = 0; mi < _methods->length(); mi++) {
+        const Method* const m = _methods->at(mi);
+        const char* const mname = m->name()->as_C_string();
+        // method name must be exactly <field name>$lzycompute
+        if (strlen(mname) != fname_len + suffix_len ||
+            strncmp(mname, fname, fname_len) != 0 ||
+            strcmp(mname + fname_len, suffix) != 0) {
+          continue;
+        }
+        // method return type must be identical to the field's type
+        const char* const msig = m->signature()->as_C_string();
+        const char* const ret = strrchr(msig, ')');
+        if (ret == nullptr || strcmp(ret + 1, fsig) != 0) {
+          continue;
+        }
+        f->field_flags_addr()->update_stable(true);
+        log_debug(class, init)("Auto-@Stable field %s %s in %s (matched %s%s)",
+                               fname, fsig, _class_name->as_C_string(), fname, suffix);
+        break;
+      }
+    }
+  }
+
   // Additional attributes/annotations
   _parsed_annotations = new ClassAnnotationCollector();
   parse_classfile_attributes(stream, cp, _parsed_annotations, CHECK);
