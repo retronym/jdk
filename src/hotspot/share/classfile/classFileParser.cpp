@@ -1886,6 +1886,15 @@ AnnotationCollector::annotation_index(const ClassLoaderData* loader_data,
       if (!privileged)              break;  // only allow in privileged code
       return _field_Stable;
     }
+    case VM_SYMBOL_ENUM_NAME(java_lang_annotation_Stable_signature): {
+      // The public counterpart of jdk.internal.vm.annotation.Stable.
+      // Unlike the internal annotation, this is honored for fields of
+      // classes loaded by any class loader, so that libraries outside the
+      // JDK (e.g. for lazy/memoized values) can opt in to stable-field
+      // constant folding.  See JEP 401.
+      if (_location != _in_field)   break;  // only allow for fields
+      return _field_Stable;
+    }
     case VM_SYMBOL_ENUM_NAME(jdk_internal_vm_annotation_TrustFinalFields_signature): {
       if (_location != _in_class)   break;  // only allow for classes
       if (!privileged)              break;  // only allow in privileged code
