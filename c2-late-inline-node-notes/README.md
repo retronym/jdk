@@ -83,7 +83,9 @@ Other mislabelled instructions include the `ArraySeq.unsafeArray` / array-length
 
 Restore the previous default node notes when `do_late_inline_helper` returns, as the parser does after parsing an inlined method (`PreserveDefaultNodeNotes` in `callGenerator.cpp`). Only debug info changes; the generated code is identical in the repro.
 
-Not done yet: a jtreg regression test (e.g. along the lines of JDK-8201516's `TestDebugInfo`, or checking that no PcDesc outside a late-inlined callee carries its call-site JVMS), and running tier1 compiler tests.
+Regression test: `compiler/c2/irTests/TestDebugInfo.java#testBoxingLateInline` checks the `BEFORE_MATCHING` IR (debug VM) for a `ThreadLocal` node (created by macro expansion of the box allocation) carrying the `valueOf()` call site's JVMS. It fails on unpatched mainline fastdebug (`ThreadLocal === 0 [[ 237 239 ]] !jvms: TestDebugInfo::testBoxingLateInline @ bci:1`) and passes with the fix.
+
+With the fix, nodes created after late inlining carry no JVMS (the compilation's initial default notes), so non-safepoint debug info falls back to neighbouring entries instead of naming an unrelated call site.
 
 ## Reproducing
 
