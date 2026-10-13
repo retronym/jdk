@@ -564,6 +564,15 @@ void LateInlineVirtualCallGenerator::do_late_inline() {
   CallGenerator::do_late_inline_helper();
 }
 
+// Saves the compilation's default node notes and restores them on scope exit.
+class PreserveDefaultNodeNotes : public StackObj {
+  Compile* const _C;
+  Node_Notes* const _saved;
+ public:
+  PreserveDefaultNodeNotes(Compile* C) : _C(C), _saved(C->default_node_notes()) {}
+  ~PreserveDefaultNodeNotes() { _C->set_default_node_notes(_saved); }
+};
+
 void CallGenerator::do_late_inline_helper() {
   assert(is_late_inline(), "only late inline allowed");
 
@@ -663,7 +672,10 @@ void CallGenerator::do_late_inline_helper() {
       return;
     }
 
-    // Setup default node notes to be picked up by the inlining
+    // Setup default node notes to be picked up by the inlining. The caller's
+    // defaults are restored on exit, otherwise all nodes created by later phases
+    // would inherit this call site's JVMS in non-safepoint debug info.
+    PreserveDefaultNodeNotes pdnn(C);
     Node_Notes* old_nn = C->node_notes_at(call->_idx);
     if (old_nn != nullptr) {
       Node_Notes* entry_nn = old_nn->clone(C);

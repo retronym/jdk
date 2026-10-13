@@ -132,4 +132,16 @@ public class TestDebugInfo {
         useful1();
         b0 = 0;
     }
+
+    static Object boxSink;
+
+    // Verify that nodes created after late inlining of a boxing method (here by
+    // macro expansion of the box allocation) do not inherit the debug information
+    // of the valueOf() call site.
+    @Test
+    @Arguments(values = Argument.RANDOM_EACH)
+    @IR(failOn = {"ThreadLocal.*testBoxingLateInline.*bci:1"}, phase = CompilePhase.BEFORE_MATCHING)
+    public static void testBoxingLateInline(int x) {
+        boxSink = Integer.valueOf(x);
+    }
 }
